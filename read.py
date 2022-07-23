@@ -119,7 +119,7 @@ for page in filteredPages:
 
 #Sorts the data
 def pagesort(data):
-	return data[1]-0.5
+	return data[1]
 
 userSupport.sort(key=pagesort,reverse=True)
 
