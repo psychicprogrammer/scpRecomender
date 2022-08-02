@@ -104,7 +104,7 @@ for user in filteredUsers:
 def pagesort(data):
 	return data[1]
 
-userSupport.sort(key=pagesort,reverse=True)
+userSupport.sort(key=pagesort,reverse=False)
 
 #prints the top X points
 for i in range(count):

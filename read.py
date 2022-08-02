@@ -19,7 +19,11 @@ def getUser(connection, userName):
 		querry = "select UserId from users where DisplayName = %s"
 		cursor = connection.cursor(prepared = True)
 		cursor.execute(querry,(userName,))
-		return float(cursor.fetchall()[0][0])
+		result = cursor.fetchall()
+		print(result)
+		if len(result) == 0:
+			return 0.0
+		return float(result[0][0])
 	except Error as e:
 		print(f"the error '{e}' occurred")
 		quit()
@@ -56,6 +60,17 @@ def getPageName(connection, pageId):
 	except Error as e:
 		print(f"the error '{e}' occurred")
 		quit()
+
+def getPageVotes(connection, pageId):
+	try:
+		querry = "select sum(value) from votes where PageId = %s"
+		cursor = connection.cursor(prepared = True)
+		cursor.execute(querry,(int(pageId),))
+		return float(cursor.fetchall()[0][0])
+	except Error as e:
+		print(f"the error '{e}' occurred")
+		quit()
+
 
 
 
@@ -98,11 +113,14 @@ if len(sys.argv) == 4:
 else: #Else jsut do all of the pages
 	filteredPages = np.array(list(map(lambda x: int(float(x)), list(pagesBias.keys()))))
 
+if str(userid) in usersLatent:
+	print(usersLatent[str(userid)])
+else:
+	usersLatent[str(userid)] = np.zeros(15)
+	userBias[str(userid)] = 0
 
-print(usersLatent[str(userid)])
-
-
-filteredPages = np.setdiff1d(filteredPages, getVotes(connection,userid))
+if userid != 0.0:
+	filteredPages = np.setdiff1d(filteredPages, getVotes(connection,userid))
 
 
 
@@ -113,7 +131,8 @@ userSupport = []
 for page in filteredPages:
 	if not str(float(page)) in pagesBias:
 		continue
-	prob = np.dot(usersLatent[str(userid)],pagesLatent[str(float(page))]) + pagesBias[str(float(page))] + userBias[str(userid)] + bias
+	#voteCount = getPageVotes(connection, page)
+	prob = np.dot(usersLatent[str(userid)],pagesLatent[str(float(page))]) + pagesBias[str(float(page))] + userBias[str(userid)] + bias# - np.log(voteCount)/5
 	prob = 1/(1+np.exp(-prob))
 	userSupport.append([page,prob])
 
@@ -126,7 +145,8 @@ userSupport.sort(key=pagesort,reverse=True)
 #prints the top X points
 for i in range(count):
 	pageData = getPageName(connection, int(userSupport[i][0]))
-	print(str(i+1)+": "+ pageData[1]+"\tscore: "+str(userSupport[i][1])+"\tlink: https://scp-wiki.wikidot.com/"+pageData[0])
+	
+	print(str(i+1)+": "+ pageData[1]+"\tscore: "+str(userSupport[i][1])+"\tlink: https://scp-wiki.wikidot.com/"+pageData[0] )
 
 
 

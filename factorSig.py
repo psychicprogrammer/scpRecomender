@@ -76,7 +76,7 @@ def updateUserLatent(errors,userLatent,pagesLatent,learningRate,regulerization):
 		newUserLatent[error[1]] += learningRate * error[2] * pagesLatent[error[0]] * error[3]
 
 	for k in newUserLatent.keys():
-		newUserLatent[k] -= learningRate * regulerization * userLatent[k]
+		newUserLatent[k] -= learningRate * regulerization * (userLatent[k] + np.sum(userLatent[k]))
 
 	return newUserLatent
 
@@ -86,7 +86,7 @@ def updatePagesLatent(errors,userLatent,pagesLatent,learningRate,regulerization)
 		newPagesLatent[error[0]] += learningRate * error[2] * userLatent[error[1]] * error[3]
 
 	for k in newPagesLatent.keys():
-		newPagesLatent[k] -= learningRate * regulerization * pagesLatent[k]
+		newPagesLatent[k] -= learningRate * regulerization * (pagesLatent[k] + np.sum(pagesLatent[k]))
 
 	return newPagesLatent
 
